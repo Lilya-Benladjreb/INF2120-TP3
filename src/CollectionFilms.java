@@ -1,4 +1,9 @@
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CollectionFilms {
@@ -7,6 +12,9 @@ public class CollectionFilms {
      * La liste des films dans cette collection
      */
     List<Film> film;
+
+    //Initialisations des constantes
+    private static final String DELIMITER = ";";
 
     /**
      * Constructeur :
@@ -23,20 +31,20 @@ public class CollectionFilms {
      * Film ID : Numéro d'identification unique du film
      * Titre : Titre du film
      * Classement MPAA : Classement MPAA pour ce film.
-     *                  • Peut prendre les valeurs : G, PG, PG-13, R, ou NC-17
+     * • Peut prendre les valeurs : G, PG, PG-13, R, ou NC-17
      * Budget : Le budget alloué pour faire ce film
      * Recettes : Les recettes produites par ce film
      * Date de sortie : La date de sortie de ce film
-     *                  • Sous le format aaaa-mm-jj (ex.: 1989-10-12)
+     * • Sous le format aaaa-mm-jj (ex.: 1989-10-12)
      * Genre : Le genre de ce film
-     *         • Peut prendre les valeurs : Romance, Comedie, Crime, Guerre,
-     *        Drame, Famille, Action, Animation, Science Fiction, Aventure,
-     *        Thriller, Western, Horreur, Mistere, Histoire, et Fantastique.
+     * • Peut prendre les valeurs : Romance, Comedie, Crime, Guerre,
+     * Drame, Famille, Action, Animation, Science Fiction, Aventure,
+     * Thriller, Western, Horreur, Mistere, Histoire, et Fantastique.
      * Duree : La durée, en minutes, de ce film
      * Evaluation : Note moyenne (sur 10) attribuée à ce film
      * Nombre d'evaluations : Le nombre d'évaluations sur lequel on a calculé
-     *                        l'évaluation précédente (note moyenne).
-     *
+     * l'évaluation précédente (note moyenne).
+     * <p>
      * Le fichier statistiquesFilms.csv, donné avec l'énoncé de ce TP,
      * est un exemple de fichier valide. Notez que dans un fichier valide,
      * tous les films ont un Film ID différent, mais il peut cependant y avoir
@@ -45,7 +53,7 @@ public class CollectionFilms {
      * de sortie, et la même durée (même si leurs IDs sont différents),
      * en conformité à la méthode equals de la classe Film. De plus, notez que
      * les films, dans un fichier valide, ne sont pas nécessairement triés.
-     *
+     * <p>
      * IMPORTANT :
      * 1. Tous les films contenus dans le fichier passé en paramètre doivent
      * être présents dans la liste film créée (même les doublons, s'il y a
@@ -56,7 +64,7 @@ public class CollectionFilms {
      * inexistant sur le disque, etc.) ou s'il existe, mais qu'il est vide,
      * alors la collection créée demeure vide (sa liste films a une longueur
      * égale à 0).
-     *
+     * <p>
      * NOTE :
      * Pour obtenir un objet de type LocalDate à partir d'une date représentée
      * sous forme de chaine de caractères dans le format aaaa-mm-jj, utilisez
@@ -66,16 +74,64 @@ public class CollectionFilms {
      * @param cheminFic Le chemin du fichier CSV qui contient la liste des
      *                  films que contiendra cette collection.
      */
-    public CollectionFilms(String cheminFic){
+    public CollectionFilms(String cheminFic) {
+        //ouvrir fichier
+        //skip 1ere ligne
+        //Créer new film avec une ligne du fichier
+        //initialiser les infos
+
+        film = new ArrayList<Film>();
+
+        Path path = Paths.get(cheminFic);
+
+        try {
+            film = Files.readAllLines(path)
+                    .stream()
+                    .skip(1)
+                    .map(ligne -> ligne.split(DELIMITER))
+                    .map(listeInfos -> {};
+        } catch (Exception e) {
+        }
+
+    }
+
+    private Film dataToFilm (String[] listeinfos){
+        String[] listeInfos = listeinfos;
+        Film film;
+
+            /*Film (int id, String titre, String
+                    classementMPAA, long budget,long recettes,
+                    LocalDate dateSortie, String genre, int duree,
+                    double evaluation, int nbrEvaluations
+                             */
+            int id = listeInfos[0];
+            String titre = listeInfos[1];
+            String classementMPAA = listeInfos[2];
+            long budget = listeInfos[3];
+            long recettes;
+            LocalDate dateSortie;
+            String genre = listeInfos[6];
+            int duree;
+            double evaluation;
+            int nbrEvalutation;
+
+
+            return new Film(id, listeInfos[1],
+                    listeInfos[2], listeInfos[3],
+                    listeInfos[4], listeInfos[5],
+                    listeInfos[6], listeInfos[7],
+                    listeInfos[7], listeInfos[8],
+                    listeInfos[9]);
 
     }
 
     /**
      * Cette méthode retourne le nombre total de films distincts
      * (sans compter les doublons) dans la collection.
+     *
      * @return le nombre de film
      */
-    public int getNbrFilmsDistincts(){
+    public int getNbrFilmsDistincts() {
         int nbrTotalFilmDistinct = 0;
 
         return nbrTotalFilmDistinct;
@@ -87,13 +143,13 @@ public class CollectionFilms {
      * (sans doublons) de cette collection qui contiennent, dans leur titre,
      * l'expression donnée en paramètre (sans tenir compte de la casse).
      * Si aucun film n'est trouvé, cette méthode retourne une liste vide.
-     *
+     * <p>
      * Exemple :
      * En supposant que l'expression donnée en paramètre est bat, les films
      * ayant les titres suivants seraient retournés par cette recherche :
-     *      • LE BATEAU-MOUCHE
-     *      • Les Battements d'ailes d'un papillon
-     *      • Abats et autres mets délicieux.
+     * • LE BATEAU-MOUCHE
+     * • Les Battements d'ailes d'un papillon
+     * • Abats et autres mets délicieux.
      * Si le paramètre expression est null ou est égal à la chaine vide,
      * cette méthode retourne une liste vide.
      * De plus, la liste des films retournée doit être triée par titre
@@ -101,10 +157,10 @@ public class CollectionFilms {
      * le même titre, ceux-ci doivent être triés entre eux selon leur ID.
      *
      * @param expression Expression qui doit être contenue dans le titre des
-     *                  films qu'on recherche.
+     *                   films qu'on recherche.
      * @return resultat
      */
-    public List<Film> rechecherParTitre(String expression){
+    public List<Film> rechecherParTitre(String expression) {
         List<Film> resultatParTitre;
 
         return resultatParTitre;
@@ -124,7 +180,7 @@ public class CollectionFilms {
      * @param evaluationMinimum
      * @return
      */
-    public List<Film> rechercherParEvalutaion(double evaluationMinimum){
+    public List<Film> rechercherParEvalutaion(double evaluationMinimum) {
         List<Film> resultatParEvaluation;
 
         return resultatParEvaluation;
@@ -136,7 +192,7 @@ public class CollectionFilms {
      * en paramètre ET dont l'évaluation est plus grande ou égale à
      * l'évaluationMinimum donné en paramètre. Si aucun film n'est trouvé,
      * la méthode retourne une liste vide.
-     *
+     * <p>
      * En ce qui concerne la sélection selon le genre, pour qu'un film soit
      * sélectionné, il faut que son genre associé soit exactement égal (mais
      * sans tenir compte de la casse) à l'une des valeurs dans la liste genres
@@ -146,13 +202,13 @@ public class CollectionFilms {
      * films ont le même titre, ceux- ci doivent être triés entre eux selon
      * leur ID.
      *
-     * @param genres On cherche les films dont le genre est présent dans cette
-     *               liste.
+     * @param genres            On cherche les films dont le genre est présent dans cette
+     *                          liste.
      * @param evaluationMinimum L'évaluation minimum des films recherchés.
      * @return resultatParGenres
      */
     public List<Film> rechercheParGenres(List<String> genres,
-                                         double evaluationMinimum){
+                                         double evaluationMinimum) {
         List<Film> resultatParGenres;
 
         return resultatParGenres;
@@ -163,27 +219,27 @@ public class CollectionFilms {
      * (sans doublons) dont la date de sortie se trouve entre dateDebut et
      * dateFin inclusivement. Si aucun film n'est trouvé, cette méthode
      * retourne une liste vide.
-     *
+     * <p>
      * Précisions :
-     *      * Si dateDebut n'est pas null et dateFin n'est pas null, on
-     *        recherche les films dont la date de sortie est entre dateDebut et
-     *        dateFin inclusivement.
-     *      * Si dateDebut est null et dateFin n'est pas null, on rechercher
-     *        les films dont la date de sortie est inférieure ou égale à
-     *        dateFin.
-     *      * Si dateDebut n'est pas null et dateFin est null, on recherche
-     *        les films dont la date de sortie est supérieure ou égale à
-     *        dateDebut.
-     *      * Si dateDebut est égale à dateFin, on recherche les films dont la
-     *        date de sortie est égale à dateDebut (ou dateFin).
-     *      * Cette méthode doit lever une java.util.NoSuchElementException si
-     *        dateDebut et dateFin sont toutes les deux null ou si dateDebut
-     *        est supérieure à dateFin.
-     *
+     * * Si dateDebut n'est pas null et dateFin n'est pas null, on
+     * recherche les films dont la date de sortie est entre dateDebut et
+     * dateFin inclusivement.
+     * * Si dateDebut est null et dateFin n'est pas null, on rechercher
+     * les films dont la date de sortie est inférieure ou égale à
+     * dateFin.
+     * * Si dateDebut n'est pas null et dateFin est null, on recherche
+     * les films dont la date de sortie est supérieure ou égale à
+     * dateDebut.
+     * * Si dateDebut est égale à dateFin, on recherche les films dont la
+     * date de sortie est égale à dateDebut (ou dateFin).
+     * * Cette méthode doit lever une java.util.NoSuchElementException si
+     * dateDebut et dateFin sont toutes les deux null ou si dateDebut
+     * est supérieure à dateFin.
+     * <p>
      * De plus, la liste retournée doit être triée par dates de sortie.
      * Si plusieurs films ont la même date de sortie, ceux-ci doivent être
      * triés entre eux selon leur ID.
-     *
+     * <p>
      * NOTE :
      * Pour tester si une LocalDate est inférieure, égale ou supérieure à une
      * autre LocalDate, utilisez la méthode compareTo de la classe LocalDate.
@@ -193,13 +249,13 @@ public class CollectionFilms {
      * @param dateDebut La date de sortie inférieure minimale des films
      *                  recherchés. Si cette date est null, il n'y a pas de
      *                  date minimale à considérer pour la recherche.
-     * @param dateFin La date de sortie supérieure maximale des films
-     *               recherchés. Si cette date est null, il n'y a pas de date
-     *               maximale à considérer pour la recherche.
+     * @param dateFin   La date de sortie supérieure maximale des films
+     *                  recherchés. Si cette date est null, il n'y a pas de date
+     *                  maximale à considérer pour la recherche.
      * @return resultatParPeriode
      */
     public List<Film> rechercheParPeriode(LocalDate dateDebut,
-                                         LocalDate dateFin){
+                                          LocalDate dateFin) {
         List<Film> resultatParPeriode;
 
         return resultatParPeriode;
@@ -214,28 +270,29 @@ public class CollectionFilms {
      * doit être de longueur x. Notez qu'on calcule ici le profit d'un film en
      * faisant la différence entre ses recettes et son budget
      * (recettes - budget).
-     *
+     * <p>
      * Si n > 0, la méthode doit retourner un tableau contenant les n titres de
      * film les PLUS profitables, et le tableau retourné doit être trié en
      * ordre décroisssant des profits. Si deux films ont le même profit, ils
      * doivent être triés entre eux selon leur ID (en ordre croissant).
-     *
+     * <p>
      * Si n < 0, la méthode doit retourner un tableau contenant les -n titres
      * de film les MOINS profitables, et le tableau retourné doit être trié en
      * ordre croisssant des profits. Si deux films ont le même profit, ils
      * doivent être triés entre eux selon leur ID (en ordre croissant).
-     *
+     * <p>
      * Si n = 0, le tableau retourné doit être de longueur 0.
      * Notez que si la valeur absolue de n est plus grande que le nombre de
      * films distincts contenu dans cette collection, la méthode retourne un
      * tableau contenant TOUS les titres des films disctincts de cette
      * collection.
+     *
      * @param n Si n est positif, on recherche les n films ayant fait le plus
      *          de profit. Si n est négatif, on recherche les |n| films ayant
      *          fait le moins de profit.
      * @return resultatParProfit
      */
-    public String[] rechercheParProfit(int n){
+    public String[] rechercheParProfit(int n) {
         String[] resultatParProfit;
 
         return resultatParProfit;
