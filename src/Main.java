@@ -4,7 +4,5 @@ public class Main {
 
         CollectionFilms c = new CollectionFilms(fichier);
 
-        System.out.println(c.getNbrFilmsDistincts());
-        System.out.println(c.rechecherParTitre("Batman"));
     }
 }

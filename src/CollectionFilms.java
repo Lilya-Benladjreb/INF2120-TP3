@@ -1,17 +1,17 @@
-import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CollectionFilms {
     /**
      * Attribut d'instance :
      * La liste des films dans cette collection
      */
-    List<Film> film;
+    List<Film> films;
 
     //Initialisations des constantes
     private static final String DELIMITER = ";";
@@ -80,49 +80,45 @@ public class CollectionFilms {
         //Créer new film avec une ligne du fichier
         //initialiser les infos
 
-        film = new ArrayList<Film>();
+        films = new ArrayList<>();
 
         Path path = Paths.get(cheminFic);
 
         try {
-            film = Files.readAllLines(path)
+            films = Files.readAllLines(path)
                     .stream()
                     .skip(1)
                     .map(ligne -> ligne.split(DELIMITER))
-                    .map(listeInfos -> {};
-        } catch (Exception e) {
+                    .map(listeInfos -> dataToFilm(listeInfos))
+                    .collect(Collectors.toList());
+        } catch (Exception ignored) {
+            films = new ArrayList<>();
         }
 
     }
 
     private Film dataToFilm (String[] listeinfos){
-        String[] listeInfos = listeinfos;
-        Film film;
+        Film film = null;
 
-            /*Film (int id, String titre, String
-                    classementMPAA, long budget,long recettes,
-                    LocalDate dateSortie, String genre, int duree,
-                    double evaluation, int nbrEvaluations
-                             */
-            int id = listeInfos[0];
-            String titre = listeInfos[1];
-            String classementMPAA = listeInfos[2];
-            long budget = listeInfos[3];
-            long recettes;
-            LocalDate dateSortie;
-            String genre = listeInfos[6];
-            int duree;
-            double evaluation;
-            int nbrEvalutation;
+            int id = Integer.parseInt(listeinfos[0]);
+            String titre = listeinfos[1];
+            String classementMPAA = listeinfos[2];
+            long budget = Long.parseLong(listeinfos[3]);
+            long recettes = Long.parseLong(listeinfos[4]);
+            LocalDate dateSortie = LocalDate.parse(listeinfos[5]);
+            String genre = listeinfos[6];
+            int duree = Integer.parseInt(listeinfos[7]);
+            double evaluation = Double.parseDouble(listeinfos[8]);
+            int nbrEvalutation = Integer.parseInt(listeinfos[9]);
 
 
-            return new Film(id, listeInfos[1],
-                    listeInfos[2], listeInfos[3],
-                    listeInfos[4], listeInfos[5],
-                    listeInfos[6], listeInfos[7],
-                    listeInfos[7], listeInfos[8],
-                    listeInfos[9]);
+        try {
+            film = new Film(id, titre, classementMPAA, budget, recettes,
+                   dateSortie, genre, duree, evaluation, nbrEvalutation);
+        } catch (FilmInvalideException ignored) {
+        }
 
+        return film;
     }
 
     /**
