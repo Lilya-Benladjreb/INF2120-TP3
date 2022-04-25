@@ -195,11 +195,11 @@ public class CollectionFilms {
      * évaluation, et le même genre, ceux-ci doivent être triés entre eux
      * selon leur ID.
      *
-     * @param evaluationMinimum
-     * @return films : une liste de films
+     * @param evaluationMinimum  L'évaluation minimum des films recherchés.
+     * @return resultatParEvaluation
      */
-    public List<Film> rechercherParEvalutaion(double evaluationMinimum) {
-        return films = films.stream()
+    public List<Film> rechercherParEvaluation(double evaluationMinimum) {
+        return films.stream()
                 .distinct()
                 .filter(film -> film.getEvaluation() >= evaluationMinimum)
                 .sorted(Comparator.comparingDouble((Film::getEvaluation)))
@@ -229,9 +229,11 @@ public class CollectionFilms {
      */
     public List<Film> rechercheParGenres(List<String> genres,
                                          double evaluationMinimum) {
-        List<Film> resultatParGenres;
-
-        return resultatParGenres;
+        return films.stream()
+                .distinct()
+                .filter(film -> genres.contains(film.getGenre()))
+                .filter(film -> film.getEvaluation() >= evaluationMinimum)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -276,9 +278,8 @@ public class CollectionFilms {
      */
     public List<Film> rechercheParPeriode(LocalDate dateDebut,
                                           LocalDate dateFin) {
-        List<Film> resultatParPeriode;
-
-        return resultatParPeriode;
+        return films.stream()
+                .filter();
     }
 
     /**
