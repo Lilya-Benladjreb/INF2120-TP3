@@ -3,8 +3,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CollectionFilms {
     /**
@@ -97,24 +100,24 @@ public class CollectionFilms {
 
     }
 
-    private Film dataToFilm (String[] listeinfos){
+    private Film dataToFilm(String[] listeinfos) {
         Film film = null;
 
-            int id = Integer.parseInt(listeinfos[0]);
-            String titre = listeinfos[1];
-            String classementMPAA = listeinfos[2];
-            long budget = Long.parseLong(listeinfos[3]);
-            long recettes = Long.parseLong(listeinfos[4]);
-            LocalDate dateSortie = LocalDate.parse(listeinfos[5]);
-            String genre = listeinfos[6];
-            int duree = Integer.parseInt(listeinfos[7]);
-            double evaluation = Double.parseDouble(listeinfos[8]);
-            int nbrEvalutation = Integer.parseInt(listeinfos[9]);
+        int id = Integer.parseInt(listeinfos[0]);
+        String titre = listeinfos[1];
+        String classementMPAA = listeinfos[2];
+        long budget = Long.parseLong(listeinfos[3]);
+        long recettes = Long.parseLong(listeinfos[4]);
+        LocalDate dateSortie = LocalDate.parse(listeinfos[5]);
+        String genre = listeinfos[6];
+        int duree = Integer.parseInt(listeinfos[7]);
+        double evaluation = Double.parseDouble(listeinfos[8]);
+        int nbrEvalutation = Integer.parseInt(listeinfos[9]);
 
 
         try {
             film = new Film(id, titre, classementMPAA, budget, recettes,
-                   dateSortie, genre, duree, evaluation, nbrEvalutation);
+                    dateSortie, genre, duree, evaluation, nbrEvalutation);
         } catch (FilmInvalideException ignored) {
         }
 
@@ -129,6 +132,10 @@ public class CollectionFilms {
      */
     public int getNbrFilmsDistincts() {
         int nbrTotalFilmDistinct = 0;
+
+        nbrTotalFilmDistinct = (int) films.stream()
+                .distinct()
+                .count();
 
         return nbrTotalFilmDistinct;
 
@@ -157,9 +164,12 @@ public class CollectionFilms {
      * @return resultat
      */
     public List<Film> rechecherParTitre(String expression) {
-        List<Film> resultatParTitre;
 
-        return resultatParTitre;
+        return films.stream()
+                .filter(listeTitre -> listeTitre.getTitre()
+                        .contains(expression))
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     /**
@@ -177,9 +187,8 @@ public class CollectionFilms {
      * @return
      */
     public List<Film> rechercherParEvalutaion(double evaluationMinimum) {
-        List<Film> resultatParEvaluation;
 
-        return resultatParEvaluation;
+        return films = null;
     }
 
     /**
@@ -198,8 +207,8 @@ public class CollectionFilms {
      * films ont le même titre, ceux- ci doivent être triés entre eux selon
      * leur ID.
      *
-     * @param genres            On cherche les films dont le genre est présent dans cette
-     *                          liste.
+     * @param genres            On cherche les films dont le genre est présent
+     *                          dans cette liste.
      * @param evaluationMinimum L'évaluation minimum des films recherchés.
      * @return resultatParGenres
      */
@@ -289,8 +298,29 @@ public class CollectionFilms {
      * @return resultatParProfit
      */
     public String[] rechercheParProfit(int n) {
-        String[] resultatParProfit;
 
-        return resultatParProfit;
+        Stream<Film> distinctFilms = films.stream()
+                .distinct();
+
+        Stream<Film> sortedFilms;
+        if (n > 0) {
+            sortedFilms = distinctFilms.sorted(
+                    Comparator.comparingLong(
+                            film -> film.getRecettes() - film.getBudget()));
+        } else {
+            sortedFilms = distinctFilms.sorted(
+                    Collections.reverseOrder(
+                            Comparator.comparingLong(
+                                    film -> film.getRecettes() -
+                                            film.getBudget())
+
+            ));
+        }
+
+        return sortedFilms
+                .limit(Math.abs(n))
+                .map(Film::getTitre)
+                .toArray(String[]::new);
     }
+
 }
