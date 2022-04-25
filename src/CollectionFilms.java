@@ -92,7 +92,7 @@ public class CollectionFilms {
                     .stream()
                     .skip(1)
                     .map(ligne -> ligne.split(DELIMITER))
-                    .map(listeInfos -> dataToFilm(listeInfos))
+                    .map(this::dataToFilm)
                     .collect(Collectors.toList());
         } catch (Exception ignored) {
             films = new ArrayList<>();
@@ -100,6 +100,18 @@ public class CollectionFilms {
 
     }
 
+
+    /**
+     * Cette méthode retourne un film avec toutes les informations prisent du
+     * fichier CSV. Sert à transformer le data de type String à son type
+     * approprié pour créer un objet Film. Si le film est invalide, il
+     * retourne un film avec la valeur 'null'.
+     * @param listeinfos - liste de String venant du stream, contient les
+     *                   informations pour un film divisées par des ";".
+     * @return Film film - avec les informations transformés avec le bon type
+     *                      donnée. Peut être null si une information n'est
+     *                      pas valide.
+     */
     private Film dataToFilm(String[] listeinfos) {
         Film film = null;
 
@@ -184,11 +196,14 @@ public class CollectionFilms {
      * selon leur ID.
      *
      * @param evaluationMinimum
-     * @return
+     * @return films : une liste de films
      */
     public List<Film> rechercherParEvalutaion(double evaluationMinimum) {
-
-        return films = null;
+        return films = films.stream()
+                .distinct()
+                .filter(film -> film.getEvaluation() >= evaluationMinimum)
+                .sorted(Comparator.comparingDouble((Film::getEvaluation)))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -298,11 +313,12 @@ public class CollectionFilms {
      * @return resultatParProfit
      */
     public String[] rechercheParProfit(int n) {
+        Stream<Film> sortedFilms;
 
         Stream<Film> distinctFilms = films.stream()
                 .distinct();
 
-        Stream<Film> sortedFilms;
+        //Lister dans le bon ordre
         if (n > 0) {
             sortedFilms = distinctFilms.sorted(
                     Comparator.comparingLong(

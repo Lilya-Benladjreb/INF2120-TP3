@@ -9,5 +9,6 @@ public class Main {
         System.out.println(c.getNbrFilmsDistincts());
         System.out.println(c.rechecherParTitre("of"));
         Arrays.stream(c.rechercheParProfit(7)).forEach(System.out::println);
+        System.out.println(c.rechercherParEvalutaion(3));
     }
 }
