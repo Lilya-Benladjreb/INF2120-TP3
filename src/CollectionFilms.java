@@ -2,10 +2,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -78,13 +76,6 @@ public class CollectionFilms {
      *                  films que contiendra cette collection.
      */
     public CollectionFilms(String cheminFic) {
-        //ouvrir fichier
-        //skip 1ere ligne
-        //Créer new film avec une ligne du fichier
-        //initialiser les infos
-
-        films = new ArrayList<>();
-
         Path path = Paths.get(cheminFic);
 
         try {
@@ -175,12 +166,15 @@ public class CollectionFilms {
      *                   films qu'on recherche.
      * @return resultat
      */
-    public List<Film> rechecherParTitre(String expression) {
+    public List<Film> rechercherParTitre(String expression) {
 
         return films.stream()
                 .filter(listeTitre -> listeTitre.getTitre()
                         .contains(expression))
                 .distinct()
+                //trier par titre
+                .sorted(Comparator.comparing(Film::getTitre))
+                //Trier par ID
                 .collect(Collectors.toList());
     }
 
@@ -227,12 +221,19 @@ public class CollectionFilms {
      * @param evaluationMinimum L'évaluation minimum des films recherchés.
      * @return resultatParGenres
      */
-    public List<Film> rechercheParGenres(List<String> genres,
+    public List<Film> rechercherParGenres(List<String> genres,
                                          double evaluationMinimum) {
+        Predicate<Film> filmParGenre = film ->
+                genres.contains(film.getGenre());
+
+        Predicate<Film> filmParEval= film ->
+                film.getEvaluation() >= evaluationMinimum;
+
         return films.stream()
                 .distinct()
-                .filter(film -> genres.contains(film.getGenre()))
-                .filter(film -> film.getEvaluation() >= evaluationMinimum)
+                .filter(filmParGenre.and(filmParEval))
+                //trier par titre, si +1 film ont même titre, trier ID
+                .sorted(Comparator.comparing(Film::getTitre))
                 .collect(Collectors.toList());
     }
 
@@ -276,11 +277,42 @@ public class CollectionFilms {
      *                  maximale à considérer pour la recherche.
      * @return resultatParPeriode
      */
-    public List<Film> rechercheParPeriode(LocalDate dateDebut,
+    public List<Film> rechercherParPeriode(LocalDate dateDebut,
                                           LocalDate dateFin) {
-        return films.stream()
-                .filter();
+        Stream<Film> sortedFilms;
+        Stream<Film> distinctFilms;
+
+        Predicate<Film> filmApresDateDebut = film ->
+                film.getDateSortie().compareTo(dateDebut) >= 0;
+        Predicate<Film> filmAvantDateFin =  film ->
+                film.getDateSortie().compareTo(dateFin) <= 0;
+
+        distinctFilms = films.stream().distinct();
+
+        if ((dateDebut.compareTo(dateFin) > 0)){
+            throw new NoSuchElementException();
+        }else if (dateDebut.equals(null) && dateFin.equals(null)){
+            throw new NoSuchElementException();
+        }else if(dateDebut.equals(null) && !dateFin.equals(null)){
+            sortedFilms = distinctFilms
+                            .sorted(Comparator.comparing(Film::getDateSortie))
+                            .filter(filmAvantDateFin);
+
+        }else if(!dateDebut.equals(null) && dateFin.equals(null)){
+            sortedFilms =  distinctFilms
+                    .sorted(Comparator.comparing(Film::getDateSortie))
+                    .filter(filmApresDateDebut);
+        }else{
+            sortedFilms = distinctFilms
+                    .sorted(Comparator.comparing(Film::getDateSortie))
+                    .filter(filmApresDateDebut.and(filmAvantDateFin));
+        }
+
+        return  sortedFilms
+                .sorted(Comparator.comparingInt(Film::getId))
+                .collect(Collectors.toList());
     }
+
 
     /**
      * Cette méthode retourne un tableau de longueur minimale contenant les n
@@ -313,7 +345,7 @@ public class CollectionFilms {
      *          fait le moins de profit.
      * @return resultatParProfit
      */
-    public String[] rechercheParProfit(int n) {
+    public String[] rechercherParProfit(int n) {
         Stream<Film> sortedFilms;
 
         Stream<Film> distinctFilms = films.stream()

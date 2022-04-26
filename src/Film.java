@@ -220,7 +220,7 @@ public class Film {
    @Override
    public int hashCode() {
       int hash = 17;
-      hash = 31 * hash + Objects.hashCode(this.titre);
+      hash = 31 * hash + Objects.hashCode(this.titre.toLowerCase());
       hash = 31 * hash + Objects.hashCode(this.dateSortie);
       hash = 31 * hash + Objects.hashCode(this.duree);
          

@@ -1,6 +1,7 @@
 import java.util.Arrays;
 import java.util.Collections;
 
+/*
 public class Main {
     public static void main(String[] args) {
         String fichier = "./statistiquesFilms.csv";
@@ -12,5 +13,7 @@ public class Main {
         Arrays.stream(c.rechercheParProfit(7)).forEach(System.out::println);
         System.out.println(c.rechercherParEvaluation(4));
         System.out.println(c.rechercheParGenres(Collections.singletonList("Comedie"), 7));
+        System.out.println(c.rechercheParPeriode();
     }
 }
+*/
