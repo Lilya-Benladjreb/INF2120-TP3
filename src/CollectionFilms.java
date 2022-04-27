@@ -8,14 +8,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CollectionFilms {
+    //Initialisations des constantes
+    private static final String DELIMITER = ";";
     /**
      * Attribut d'instance :
      * La liste des films dans cette collection
      */
     List<Film> films;
-
-    //Initialisations des constantes
-    private static final String DELIMITER = ";";
 
     /**
      * Constructeur :
@@ -97,11 +96,12 @@ public class CollectionFilms {
      * fichier CSV. Sert à transformer le data de type String à son type
      * approprié pour créer un objet Film. Si le film est invalide, il
      * retourne un film avec la valeur 'null'.
+     *
      * @param listeinfos - liste de String venant du stream, contient les
      *                   informations pour un film divisées par des ";".
      * @return Film film - avec les informations transformés avec le bon type
-     *                      donnée. Peut être null si une information n'est
-     *                      pas valide.
+     * donnée. Peut être null si une information n'est
+     * pas valide.
      */
     private Film dataToFilm(String[] listeinfos) {
         Film film = null;
@@ -118,7 +118,7 @@ public class CollectionFilms {
         double evaluation = Double.parseDouble(listeinfos[8]);
         int nbrEvalutation = Integer.parseInt(listeinfos[9]);
 
-
+        //Creation du film
         try {
             film = new Film(id, titre, classementMPAA, budget, recettes,
                     dateSortie, genre, duree, evaluation, nbrEvalutation);
@@ -174,11 +174,13 @@ public class CollectionFilms {
                         .toLowerCase()
                         .contains(expression.toLowerCase()))
                 .distinct()
-                .sorted( (film1, film2) -> {
-                    if(film1.getTitre()
-                            .equalsIgnoreCase(film2.getTitre().toLowerCase())){
+                .sorted((film1, film2) -> {
+                    //tri par ID si plusieurs films ont le même nom
+                    if (film1.getTitre()
+                            .equalsIgnoreCase(film2.getTitre().toLowerCase())) {
                         return film1.getId() - film2.getId();
-                    }else {
+                    } else {
+                        //tri par titre - cas de base
                         return film1.getTitre().toLowerCase()
                                 .compareTo(film2.getTitre().toLowerCase());
                     }
@@ -197,7 +199,7 @@ public class CollectionFilms {
      * évaluation, et le même genre, ceux-ci doivent être triés entre eux
      * selon leur ID.
      *
-     * @param evaluationMinimum  L'évaluation minimum des films recherchés.
+     * @param evaluationMinimum L'évaluation minimum des films recherchés.
      * @return resultatParEvaluation
      */
     public List<Film> rechercherParEvaluation(double evaluationMinimum) {
@@ -230,23 +232,25 @@ public class CollectionFilms {
      * @return resultatParGenres
      */
     public List<Film> rechercherParGenres(List<String> genres,
-                                         double evaluationMinimum) {
+                                          double evaluationMinimum) {
         Predicate<Film> filmParGenre = film ->
                 genres.toString()
                         .toLowerCase()
                         .contains(film.getGenre().toLowerCase());
 
-        Predicate<Film> filmParEval= film ->
+        Predicate<Film> filmParEval = film ->
                 film.getEvaluation() >= evaluationMinimum;
 
         return films.stream()
                 .distinct()
                 .filter(filmParGenre.and(filmParEval))
                 .sorted((film1, film2) -> {
-                    if(film1.getTitre()
-                            .equalsIgnoreCase(film2.getTitre())){
+                    //Tri par ID si plusieurs films ont le même nom
+                    if (film1.getTitre()
+                            .equalsIgnoreCase(film2.getTitre())) {
                         return film1.getId() - film2.getId();
-                    }else {
+                    } else {
+                        //Tri par titre - cas de base
                         return film1.getTitre().toLowerCase()
                                 .compareTo(film2.getTitre().toLowerCase());
                     }
@@ -301,25 +305,25 @@ public class CollectionFilms {
 
         distinctFilms = films.stream().distinct();
 
-        if (dateDebut != null){
+        if (dateDebut != null) {
             //(dateDebut, dateFin)
-            if(dateFin != null){
-                if(dateDebut.compareTo(dateFin) < 0){
+            if (dateFin != null) {
+                if (dateDebut.compareTo(dateFin) < 0) {
                     sortedFilms = distinctFilms
                             .filter(film -> film.getDateSortie()
                                     .compareTo(dateDebut) >= 0)
                             .filter(film -> film.getDateSortie()
                                     .compareTo(dateFin) <= 0);
-                }else{
+                } else {
                     //(dateDebut > dateFin)
                     throw new NoSuchElementException();
                 }
-            }else{
+            } else {
                 //(dateDebut, null)
                 sortedFilms = distinctFilms.filter(film ->
-                                film.getDateSortie().compareTo(dateDebut) >= 0);
+                        film.getDateSortie().compareTo(dateDebut) >= 0);
             }
-        }else{
+        } else {
             //(null,dateFin)
             sortedFilms = distinctFilms
                     .filter(film ->
@@ -327,15 +331,7 @@ public class CollectionFilms {
         }
 
 
-        return  sortedFilms
-                .sorted((film1,film2) -> {
-                    if(film1.getDateSortie().equals(film2.getDateSortie())){
-                        return film1.getId() - film2.getId();
-                    }else{
-                        return film1.getDateSortie()
-                                .compareTo(film2.getDateSortie());
-                    }
-                })
+        return sortedFilms
                 .collect(Collectors.toList());
     }
 
@@ -375,21 +371,25 @@ public class CollectionFilms {
         Stream<Film> sortedFilms;
 
         Stream<Film> distinctFilms = films.stream()
-                .distinct();
+                .distinct()
+                .sorted(Comparator.comparingInt(Film::getId));
 
         //Lister dans le bon ordre
         if (n > 0) {
-            sortedFilms = distinctFilms.sorted(
-                    Comparator.comparingLong(
-                            film -> film.getRecettes() - film.getBudget()));
-        } else {
+            //Les n premiers
             sortedFilms = distinctFilms.sorted(
                     Collections.reverseOrder(
                             Comparator.comparingLong(
                                     film -> film.getRecettes() -
                                             film.getBudget())
 
-            ));
+                    ));
+        } else {
+            //Les n derniers
+            sortedFilms = distinctFilms
+                    .sorted(Comparator.comparingLong(film ->
+                            (film.getRecettes() - film.getBudget())));
+
         }
 
         return sortedFilms
