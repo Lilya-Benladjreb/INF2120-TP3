@@ -106,6 +106,7 @@ public class CollectionFilms {
     private Film dataToFilm(String[] listeinfos) {
         Film film = null;
 
+        //Assignation des données bruts dans son bon type de données
         int id = Integer.parseInt(listeinfos[0]);
         String titre = listeinfos[1];
         String classementMPAA = listeinfos[2];
@@ -134,7 +135,7 @@ public class CollectionFilms {
      * @return le nombre de film
      */
     public int getNbrFilmsDistincts() {
-        int nbrTotalFilmDistinct = 0;
+        int nbrTotalFilmDistinct;
 
         nbrTotalFilmDistinct = (int) films.stream()
                 .distinct()
@@ -170,11 +171,18 @@ public class CollectionFilms {
 
         return films.stream()
                 .filter(listeTitre -> listeTitre.getTitre()
-                        .contains(expression))
+                        .toLowerCase()
+                        .contains(expression.toLowerCase()))
                 .distinct()
-                //trier par titre
-                .sorted(Comparator.comparing(Film::getTitre))
-                //Trier par ID
+                .sorted( (film1, film2) -> {
+                    if(film1.getTitre()
+                            .equalsIgnoreCase(film2.getTitre().toLowerCase())){
+                        return film1.getId() - film2.getId();
+                    }else {
+                        return film1.getTitre().toLowerCase()
+                                .compareTo(film2.getTitre().toLowerCase());
+                    }
+                })
                 .collect(Collectors.toList());
     }
 
@@ -224,7 +232,9 @@ public class CollectionFilms {
     public List<Film> rechercherParGenres(List<String> genres,
                                          double evaluationMinimum) {
         Predicate<Film> filmParGenre = film ->
-                genres.contains(film.getGenre());
+                genres.toString()
+                        .toLowerCase()
+                        .contains(film.getGenre().toLowerCase());
 
         Predicate<Film> filmParEval= film ->
                 film.getEvaluation() >= evaluationMinimum;
@@ -232,8 +242,15 @@ public class CollectionFilms {
         return films.stream()
                 .distinct()
                 .filter(filmParGenre.and(filmParEval))
-                //trier par titre, si +1 film ont même titre, trier ID
-                .sorted(Comparator.comparing(Film::getTitre))
+                .sorted((film1, film2) -> {
+                    if(film1.getTitre()
+                            .equalsIgnoreCase(film2.getTitre())){
+                        return film1.getId() - film2.getId();
+                    }else {
+                        return film1.getTitre().toLowerCase()
+                                .compareTo(film2.getTitre().toLowerCase());
+                    }
+                })
                 .collect(Collectors.toList());
     }
 
@@ -273,43 +290,52 @@ public class CollectionFilms {
      *                  recherchés. Si cette date est null, il n'y a pas de
      *                  date minimale à considérer pour la recherche.
      * @param dateFin   La date de sortie supérieure maximale des films
-     *                  recherchés. Si cette date est null, il n'y a pas de date
-     *                  maximale à considérer pour la recherche.
+     *                  recherchés. Si cette date est null, il n'y a pas de
+     *                  date maximale à considérer pour la recherche.
      * @return resultatParPeriode
      */
     public List<Film> rechercherParPeriode(LocalDate dateDebut,
-                                          LocalDate dateFin) {
+                                           LocalDate dateFin) {
         Stream<Film> sortedFilms;
         Stream<Film> distinctFilms;
 
-        Predicate<Film> filmApresDateDebut = film ->
-                film.getDateSortie().compareTo(dateDebut) >= 0;
-        Predicate<Film> filmAvantDateFin =  film ->
-                film.getDateSortie().compareTo(dateFin) <= 0;
-
         distinctFilms = films.stream().distinct();
 
-        if ((dateDebut.compareTo(dateFin) > 0)){
-            throw new NoSuchElementException();
-        }else if (dateDebut.equals(null) && dateFin.equals(null)){
-            throw new NoSuchElementException();
-        }else if(dateDebut.equals(null) && !dateFin.equals(null)){
-            sortedFilms = distinctFilms
-                            .sorted(Comparator.comparing(Film::getDateSortie))
-                            .filter(filmAvantDateFin);
-
-        }else if(!dateDebut.equals(null) && dateFin.equals(null)){
-            sortedFilms =  distinctFilms
-                    .sorted(Comparator.comparing(Film::getDateSortie))
-                    .filter(filmApresDateDebut);
+        if (dateDebut != null){
+            //(dateDebut, dateFin)
+            if(dateFin != null){
+                if(dateDebut.compareTo(dateFin) < 0){
+                    sortedFilms = distinctFilms
+                            .filter(film -> film.getDateSortie()
+                                    .compareTo(dateDebut) >= 0)
+                            .filter(film -> film.getDateSortie()
+                                    .compareTo(dateFin) <= 0);
+                }else{
+                    //(dateDebut > dateFin)
+                    throw new NoSuchElementException();
+                }
+            }else{
+                //(dateDebut, null)
+                sortedFilms = distinctFilms.filter(film ->
+                                film.getDateSortie().compareTo(dateDebut) >= 0);
+            }
         }else{
+            //(null,dateFin)
             sortedFilms = distinctFilms
-                    .sorted(Comparator.comparing(Film::getDateSortie))
-                    .filter(filmApresDateDebut.and(filmAvantDateFin));
+                    .filter(film ->
+                            film.getDateSortie().compareTo(dateFin) <= 0);
         }
 
+
         return  sortedFilms
-                .sorted(Comparator.comparingInt(Film::getId))
+                .sorted((film1,film2) -> {
+                    if(film1.getDateSortie().equals(film2.getDateSortie())){
+                        return film1.getId() - film2.getId();
+                    }else{
+                        return film1.getDateSortie()
+                                .compareTo(film2.getDateSortie());
+                    }
+                })
                 .collect(Collectors.toList());
     }
 
